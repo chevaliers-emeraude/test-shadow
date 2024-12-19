@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shadow Duelist - Duel de Sorciers</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<style>
+@import url('https://fonts.cdnjs.com/css2?family=Cinzel:wght@400;700&display=swap');
+@import url('https://fonts.cdnjs.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primary: #2c1810;
+  --color-secondary: #8b4513;
+  --color-accent: #ffd700;
+  --color-bg: #1a0f05;
+  --color-text: #e0d5ff;
+}
+
+body {
+  background: var(--color-bg);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(139, 69, 19, 0.1), transparent),
+    repeating-linear-gradient(45deg, rgba(139, 69, 19, 0.05) 0px, rgba(139, 69, 19, 0.05) 2px, transparent 2px, transparent 4px);
+  min-height: 100vh;
+  color: var(--color-text);
+  font-family: 'Crimson Text', serif;
+  overflow: hidden;
+}
+
+.game-container {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Menu principal */
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.menu-title {
+  font-family: 'Cinzel', serif;
+  font-size: 4rem;
+  color: var(--color-accent);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  margin-bottom: 2rem;
+}
+
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.menu-btn {
+  padding: 1rem 2rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  background: transparent;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 215, 0, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.menu-btn:hover::before {
+  left: 100%;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 215, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+}
+
+/* Arena de duel */
+.duel-arena {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  height: 100%;
+  display: none;
+}
+
+.player-info {
+  background: rgba(44, 24, 16, 0.8);
+  border: 2px solid var(--color-secondary);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.player-name {
+  font-family: 'Cinzel', serif;
+  color: var(--color-accent);
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-secondary);
+}
+
+.health-bar {
+  width: 100%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.health-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.3s ease;
+}
+
+.mana-bar {
+  width: 100%;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-secondary);
+  border-radius: 7.5px;
+  overflow: hidden;
+}
+
+.mana-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #2196F3, #03A9F4);
+  transition: width 0.3s ease;
+}
+
+.battle-area {
+  position: relative;
+  background: rgba(44, 24, 16, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.battle-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000" opacity="0.1"/></svg>');
+  opacity: 0.1;
+}
+
+.wizard-stance {
+  position: absolute;
+  width: 100px;
+  height: 200px;
+  bottom: 50px;
+}
+
+.wizard-left {
+  left: 100px;
+}
+
+.wizard-right {
+  right: 100px;
+  transform: scaleX(-1);
+}
+
+/* Effets magiques */
+.magical-effect {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes spellCast {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Styles pour les particules magiques */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+@keyframes particleFade {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+</style>
+
+<body>
+  <div class="game-container">
+    <!-- Menu Principal -->
+    <div class="main-menu">
+      <h1 class="menu-title">Shadow Duelist</h1>
+      <div class="menu-options">
+        <button class="menu-btn" id="create-game">Créer une partie</button>
+        <button class="menu-btn" id="join-game">Rejoindre une partie</button>
+        <button class="menu-btn" id="tutorial">Tutoriel</button>
+      </div>
+    </div>
+
+    <!-- Arena de Duel (initialement cachée) -->
+    <div class="duel-arena">
+      <!-- Info Joueur 1 -->
+      <div class="player-info">
+        <h2 class="player-name">Joueur 1</h2>
+        <div class="health-bar">
+          <div class="health-fill"></div>
+        </div>
+        <div class="mana-bar">
+          <div class="mana-fill"></div>
+        </div>
+      </div>
+
+      <!-- Zone de Combat -->
+      <div class="battle-area">
+        <div class="battle-background"></div>
+        <div class="wizard-stance wizard-left"></div>
+        <div class="wizard-stance wizard-right"></div>
+      </div>
+
+      <!-- Info Joueur 2 -->
+      <div class="player-info">
+        <h2 class="player-name">Joueur 2</h2>
+        <div class="health-bar">
+          <div class="health-fill"></div>
+        </div>
+        <div class="mana-bar">
+          <div class="mana-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<script type="module">
+// Import et configuration de Firebase
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js';
+import { getDatabase, ref, set, get, onValue, update } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDiJr1iQqwWokvL6Mk_IOVVZfOK0ub_Tik",
+    authDomain: "shadow-duelist.firebaseapp.com",
+    databaseURL: "https://shadow-duelist-default-rtdb.firebaseio.com",
+    projectId: "shadow-duelist",
+    storageBucket: "shadow-duelist.firebasestorage.app",
+    messagingSenderId: "981873233321",
+    appId: "1:981873233321:web:1f46f17f896cc2f45388b8",
+    measurementId: "G-63VZBH3PP2"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+class DuelManager {
+  constructor() {
+    this.gameId = null;
+    this.playerId = null;
+    this.gameState = null;
+    this.opponents = {};
+    this.initializeUI();
+  }
+
+  initializeUI() {
+    // Boutons du menu principal
+    document.getElementById('create-game').addEventListener('click', () => this.createGame());
+    document.getElementById('join-game').addEventListener('click', () => this.showJoinGameDialog());
+    document.getElementById('tutorial').addEventListener('click', () => this.showTutorial());
+
+    // Création de la boîte de dialogue pour rejoindre une partie
+    this.createJoinDialog();
+  }
+
+  createJoinDialog() {
+    const dialog = document.createElement('div');
+    dialog.className = 'join-dialog';
+    dialog.innerHTML = `
+      <div class="dialog-content">
+        <h2>Rejoindre une partie</h2>
+        <input type="text" id="game-code-input" placeholder="Code de la partie">
+        <button id="join-game-btn">Rejoindre</button>
+        <button id="cancel-join-btn">Annuler</button>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+
+    // Ajouter le style pour la boîte de dialogue
+    const style = document.createElement('style');
+    style.textContent = `
+      .join-dialog {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .dialog-content {
+        background: #2c1810;
+        padding: 2rem;
+        border-radius: 10px;
+        border: 2px solid #8b4513;
+        text-align: center;
+      }
+
+      .dialog-content h2 {
+        color: #ffd700;
+        margin-bottom: 1rem;
+        font-family: 'Cinzel', serif;
+      }
+
+      .dialog-content input {
+        width: 100%;
+        padding: 0.5rem;
+        margin: 1rem 0;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid #8b4513;
+        color: #fff;
+        font-family: 'Crimson Text', serif;
+      }
+
+      .dialog-content button {
+        margin: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid #8b4513;
+        color: #ffd700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .dialog-content button:hover {
+        background: rgba(139, 69, 19, 0.3);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  async createGame() {
+    const gameId = this.generateGameId();
+    this.gameId = gameId;
+    this.playerId = 'player1';
+
+    const gameRef = ref(database, `games/${gameId}`);
+    await set(gameRef, {
+      status: 'waiting',
+      player1: {
+        connected: true,
+        health: 100,
+        mana: 100,
+        ready: false
+      },
+      player2: {
+        connected: false,
+        health: 100,
+        mana: 100,
+        ready: false
+      },
+      currentTurn: null,
+      turnPhase: 'waiting',
+      createdAt: Date.now()
+    });
+
+    this.showGameCode(gameId);
+    this.listenToGameChanges(gameId);
+  }
+
+  showGameCode(gameId) {
+    const dialog = document.createElement('div');
+    dialog.className = 'code-dialog join-dialog';
+    dialog.style.display = 'flex';
+    dialog.innerHTML = `
+      <div class="dialog-content">
+        <h2>Code de la partie</h2>
+        <p class="game-code">${gameId}</p>
+        <p>Partagez ce code avec votre adversaire</p>
+        <button id="copy-code-btn">Copier le code</button>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+
+    document.getElementById('copy-code-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(gameId);
+      document.getElementById('copy-code-btn').textContent = 'Code copié !';
+    });
+  }
+
+  showJoinGameDialog() {
+    const dialog = document.querySelector('.join-dialog');
+    dialog.style.display = 'flex';
+
+    const joinBtn = document.getElementById('join-game-btn');
+    const cancelBtn = document.getElementById('cancel-join-btn');
+    const input = document.getElementById('game-code-input');
+
+    joinBtn.addEventListener('click', () => {
+      this.joinGame(input.value.trim());
+      dialog.style.display = 'none';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      dialog.style.display = 'none';
+    });
+  }
+
+  async joinGame(gameId) {
+    const gameRef = ref(database, `games/${gameId}`);
+    const snapshot = await get(gameRef);
+
+    if (!snapshot.exists()) {
+      this.showError("Cette partie n'existe pas");
+      return;
+    }
+
+    const gameData = snapshot.val();
+    if (gameData.status !== 'waiting') {
+      this.showError("Cette partie est déjà complète");
+      return;
+    }
+
+    this.gameId = gameId;
+    this.playerId = 'player2';
+
+    await update(gameRef, {
+      'player2/connected': true,
+      status: 'starting'
+    });
+
+    this.listenToGameChanges(gameId);
+  }
+
+  listenToGameChanges(gameId) {
+    const gameRef = ref(database, `games/${gameId}`);
+    onValue(gameRef, (snapshot) => {
+      const gameData = snapshot.val();
+      if (!gameData) return;
+
+      this.gameState = gameData;
+      this.updateGameUI(gameData);
+
+      if (gameData.status === 'starting' && this.playerId === 'player1') {
+        this.startDuel();
+      }
+    });
+  }
+
+  generateGameId() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  showError(message) {
+    // Création d'une notification d'erreur
+    const notification = document.createElement('div');
+    notification.className = 'error-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    // Style pour la notification
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff4444;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 5px;
+      animation: slideDown 0.3s ease-out;
+    `;
+
+    setTimeout(() => notification.remove(), 3000);
+  }
+
+  updateGameUI(gameData) {
+    if (gameData.status === 'starting') {
+      document.querySelector('.main-menu').style.display = 'none';
+      document.querySelector('.duel-arena').style.display = 'grid';
+    }
+
+    // Mise à jour des barres de vie et de mana
+    const player1Health = document.querySelector('.player-info:first-child .health-fill');
+    const player2Health = document.querySelector('.player-info:last-child .health-fill');
+    const player1Mana = document.querySelector('.player-info:first-child .mana-fill');
+    const player2Mana = document.querySelector('.player-info:last-child .mana-fill');
+
+    player1Health.style.width = `${gameData.player1.health}%`;
+    player2Health.style.width = `${gameData.player2.health}%`;
+    player1Mana.style.width = `${gameData.player1.mana}%`;
+    player2Mana.style.width = `${gameData.player2.mana}%`;
+  }
+
+  showTutorial() {
+    // Implementation du tutoriel à venir
+    console.log("Tutoriel à implémenter");
+  }
+}
+
+// Initialiser le gestionnaire de duel quand la page est chargée
+window.addEventListener('DOMContentLoaded', () => {
+  new DuelManager();
+});
+</script>
+
+<script>
+class SpellSystem {
+  constructor() {
+    this.SPELLS = {
+      // Sorts Offensifs
+      'stupéfix': {
+        name: 'Stupéfix',
+        type: 'offensive',
+        damage: 20,
+        manaCost: 15,
+        duration: 1,
+        animation: 'thrust',
+        color: '#ff4444',
+        effect: 'stun',
+        counter: ['protego'],
+        description: 'Immobilise temporairement l\'adversaire'
+      },
+      'expelliarmus': {
+        name: 'Expelliarmus',
+        type: 'offensive',
+        damage: 10,
+        manaCost: 10,
+        animation: 'diagonal',
+        color: '#ff6b6b',
+        effect: 'disarm',
+        counter: ['protego', 'accio'],
+        description: 'Désarme l\'adversaire'
+      },
+      'sectumsempra': {
+        name: 'Sectumsempra',
+        type: 'offensive',
+        damage: 40,
+        manaCost: 35,
+        animation: 'horizontal',
+        color: '#800000',
+        effect: 'bleed',
+        counter: ['protego_maxima', 'finite_incantatem'],
+        description: 'Inflige de graves blessures magiques'
+      },
+      'incendio': {
+        name: 'Incendio',
+        type: 'offensive',
+        damage: 15,
+        manaCost: 20,
+        duration: 2,
+        animation: 'spiral',
+        color: '#ff8c00',
+        effect: 'burn',
+        counter: ['aguamenti'],
+        description: 'Crée des flammes magiques'
+      },
+      // Sorts Défensifs
+      'protego': {
+        name: 'Protego',
+        type: 'defensive',
+        manaCost: 15,
+        animation: 'circle',
+        color: '#4169e1',
+        effect: 'shield',
+        duration: 1,
+        description: 'Crée un bouclier magique'
+      },
+      'protego_maxima': {
+        name: 'Protego Maxima',
+        type: 'defensive',
+        manaCost: 30,
+        animation: 'double_circle',
+        color: '#0000cd',
+        effect: 'strong_shield',
+        duration: 1,
+        description: 'Crée un puissant bouclier magique'
+      }
+    };
+
+    this.spellAnimations = {
+      thrust: this.createThrustAnimation,
+      diagonal: this.createDiagonalAnimation,
+      horizontal: this.createHorizontalAnimation,
+      spiral: this.createSpiralAnimation,
+      circle: this.createCircleAnimation,
+      double_circle: this.createDoubleCircleAnimation
+    };
+  }
+
+  createSpellElement(spell, isPlayerOne) {
+    const spellEl = document.createElement('div');
+    spellEl.className = 'spell-effect';
+    spellEl.style.cssText = `
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+      ${isPlayerOne ? 'left: 150px;' : 'right: 150px;'}
+      bottom: 150px;
+    `;
+    return spellEl;
+  }
+
+  createThrustAnimation(spell, isPlayerOne) {
+    const spellEl = this.createSpellElement(spell, isPlayerOne);
+    spellEl.innerHTML = `
+      <svg width="50" height="200">
+        <line 
+          x1="25" y1="200" 
+          x2="25" y2="0" 
+          stroke="${spell.color}" 
+          stroke-width="10"
+          stroke-linecap="round">
+          <animate 
+            attributeName="y2" 
+            from="200" to="0"
+            dur="0.5s" 
+            fill="freeze"/>
+        </line>
+      </svg>
+    `;
+    return spellEl;
+  }
+
+  createDiagonalAnimation(spell, isPlayerOne) {
+    const spellEl = this.createSpellElement(spell, isPlayerOne);
+    spellEl.innerHTML = `
+      <svg width="200" height="200">
+        <line 
+          x1="0" y1="0" 
+          x2="200" y2="200" 
+          stroke="${spell.color}" 
+          stroke-width="10"
+          stroke-linecap="round">
+          <animate 
+            attributeName="x2" 
+            from="0" to="200"
+            dur="0.5s" 
+            fill="freeze"/>
+          <animate 
+            attributeName="y2" 
+            from="0" to="200"
+            dur="0.5s" 
+            fill="freeze"/>
+        </line>
+      </svg>
+    `;
+    return spellEl;
+  }
+
+  createParticles(x, y, color) {
+    for (let i = 0; i < 10; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 4px;
+        height: 4px;
+        background: ${color};
+        border-radius: 50%;
+      `;
+
+      const angle = (Math.random() * Math.PI * 2);
+      const velocity = Math.random() * 100 + 50;
+      const dx = Math.cos(angle) * velocity;
+      const dy = Math.sin(angle) * velocity;
+
+      particle.style.setProperty('--dx', `${dx}px`);
+      particle.style.setProperty('--dy', `${dy}px`);
+      
+      document.querySelector('.battle-area').appendChild(particle);
+      setTimeout(() => particle.remove(), 1000);
+    }
+  }
+
+  async castSpell(spell, source, target) {
+    const isPlayerOne = source === 'player1';
+    const spellData = this.SPELLS[spell];
+    const spellEl = this.spellAnimations[spellData.animation].call(this, spellData, isPlayerOne);
+    
+    document.querySelector('.battle-area').appendChild(spellEl);
+
+    // Créer l'effet de baguette magique
+    this.createWandEffect(isPlayerOne ? '.wizard-left' : '.wizard-right', spellData.color);
+
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.createParticles(
+          isPlayerOne ? 400 : 200,
+          300,
+          spellData.color
+        );
+        spellEl.remove();
+        resolve();
+      }, 500);
+    });
+  }
+
+  createWandEffect(wizardSelector, color) {
+    const wizard = document.querySelector(wizardSelector);
+    const wandTip = document.createElement('div');
+    wandTip.className = 'wand-tip';
+    wandTip.style.cssText = `
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: ${color};
+      border-radius: 50%;
+      filter: blur(2px);
+      animation: wandGlow 0.5s ease-out;
+    `;
+
+    wizard.appendChild(wandTip);
+    setTimeout(() => wandTip.remove(), 500);
+  }
+
+  calculateDamage(spell, prediction, defense) {
+    const spellData = this.SPELLS[spell];
+    let damage = spellData.damage;
+
+    // Si la prédiction est correcte, la défense est plus efficace
+    if (prediction === spell && defense) {
+      damage *= 0.5;
+    }
+
+    // Si un contre approprié est utilisé
+    if (spellData.counter.includes(defense)) {
+      damage *= 0.25;
+    }
+
+    return Math.floor(damage);
+  }
+}
+
+class DuelPhase {
+  constructor(gameManager) {
+    this.gameManager = gameManager;
+    this.spellSystem = new SpellSystem();
+    this.currentPhase = 'prediction';
+    this.predictions = {};
+    this.selectedSpells = {};
+  }
+
+  async startTurn() {
+    this.currentPhase = 'prediction';
+    this.predictions = {};
+    this.selectedSpells = {};
+    
+    // Mise à jour de l'interface pour la phase de prédiction
+    this.updatePhaseUI('prediction');
+    
+    // Attendre les prédictions des deux joueurs
+    await this.waitForPredictions();
+    
+    // Passer à la phase de sélection
+    this.currentPhase = 'selection';
+    this.updatePhaseUI('selection');
+    
+    // Attendre la sélection des sorts
+    await this.waitForSpellSelections();
+    
+    // Résoudre le tour
+    await this.resolveTurn();
+  }
+
+  updatePhaseUI(phase) {
+    // Mise à jour de l'interface selon la phase
+    const phaseDisplay = document.createElement('div');
+    phaseDisplay.className = 'phase-display';
+    phaseDisplay.textContent = phase === 'prediction' ? 
+      'Prédisez le sort de votre adversaire !' :
+      'Choisissez votre sort !';
+    
+    document.querySelector('.battle-area').appendChild(phaseDisplay);
+    setTimeout(() => phaseDisplay.remove(), 2000);
+  }
+
+  async waitForPredictions() {
+    return new Promise(resolve => {
+      // Logique d'attente des prédictions
+      // À implémenter avec Firebase
+    });
+  }
+
+  async waitForSpellSelections() {
+    return new Promise(resolve => {
+      // Logique d'attente des sélections de sorts
+      // À implémenter avec Firebase
+    });
+  }
+
+  async resolveTurn() {
+    const player1Spell = this.selectedSpells.player1;
+    const player2Spell = this.selectedSpells.player2;
+    
+    // Animer les sorts simultanément
+    await Promise.all([
+      this.spellSystem.castSpell(player1Spell, 'player1', 'player2'),
+      this.spellSystem.castSpell(player2Spell, 'player2', 'player1')
+    ]);
+    
+    // Calculer et appliquer les dégâts
+    const damage1 = this.spellSystem.calculateDamage(
+      player1Spell,
+      this.predictions.player2,
+      player2Spell
+    );
+    
+    const damage2 = this.spellSystem.calculateDamage(
+      player2Spell,
+      this.predictions.player1,
+      player1Spell
+    );
+    
+    // Mettre à jour les points de vie
+    // À implémenter avec Firebase
+  }
+}
+</script>
+
+<style>
+@keyframes wandGlow {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.spell-effect {
+  position: absolute;
+  pointer-events: none;
+}
+
+.phase-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  font-family: 'Cinzel', serif;
+  animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  20%, 80% { opacity: 1; }
+}
+
+.particle {
+  animation: particleFade 1s ease-out forwards;
+}
+
+@keyframes particleFade {
+  0% { 
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+}
+</style>
+
+<script>
+class DuelInterface {
+  constructor(duelManager) {
+    this.duelManager = duelManager;
+    this.selectedSpell = null;
+    this.prediction = null;
+    this.initializeInterface();
+  }
+
+  initializeInterface() {
+    this.createSpellInterface();
+    this.createStatusEffects();
+    this.createTurnIndicator();
+    this.createPredictionInterface();
+  }
+
+  createSpellInterface() {
+    const spellBookHtml = `
+      <div class="spell-book">
+        <div class="spell-categories">
+          <div class="spell-category active" data-category="offensive">Attaque</div>
+          <div class="spell-category" data-category="defensive">Défense</div>
+          <div class="spell-category" data-category="special">Spécial</div>
+        </div>
+        <div class="spell-list"></div>
+      </div>
+    `;
+
+    const spellBook = document.createElement('div');
+    spellBook.innerHTML = spellBookHtml;
+    document.querySelector('.battle-area').appendChild(spellBook);
+
+    // Styles pour le grimoire de sorts
+    const style = document.createElement('style');
+    style.textContent = `
+      .spell-book {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(44, 24, 16, 0.9);
+        border: 2px solid #8b4513;
+        border-radius: 10px;
+        padding: 1rem;
+        width: 80%;
+        z-index: 100;
+      }
+
+      .spell-categories {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #8b4513;
+        padding-bottom: 0.5rem;
+      }
+
+      .spell-category {
+        color: #ffd700;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        font-family: 'Cinzel', serif;
+      }
+
+      .spell-category:hover {
+        background: rgba(139, 69, 19, 0.3);
+      }
+
+      .spell-category.active {
+        background: rgba(139, 69, 19, 0.5);
+      }
+
+      .spell-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .spell-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid #8b4513;
+        border-radius: 5px;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .spell-card:hover {
+        transform: translateY(-2px);
+        background: rgba(139, 69, 19, 0.2);
+      }
+
+      .spell-card.selected {
+        border-color: #ffd700;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      }
+
+      .spell-name {
+        font-family: 'Cinzel', serif;
+        color: #ffd700;
+        margin-bottom: 0.5rem;
+      }
+
+      .spell-info {
+        font-size: 0.8rem;
+        color: #e0d5ff;
+      }
+
+      .mana-cost {
+        color: #2196F3;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  createPredictionInterface() {
+    const predictionHtml = `
+      <div class="prediction-interface">
+        <h3>Prédiction</h3>
+        <div class="prediction-options"></div>
+      </div>
+    `;
+
+    const predictionEl = document.createElement('div');
+    predictionEl.innerHTML = predictionHtml;
+    document.querySelector('.battle-area').appendChild(predictionEl);
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .prediction-interface {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(44, 24, 16, 0.9);
+        border: 2px solid #8b4513;
+        border-radius: 10px;
+        padding: 1rem;
+        display: none;
+      }
+
+      .prediction-interface h3 {
+        color: #ffd700;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-family: 'Cinzel', serif;
+      }
+
+      .prediction-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+
+      .prediction-option {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid #8b4513;
+        padding: 0.5rem;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .prediction-option:hover {
+        background: rgba(139, 69, 19, 0.3);
+      }
+
+      .prediction-option.selected {
+        border-color: #ffd700;
+        background: rgba(139, 69, 19, 0.5);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  createStatusEffects() {
+    const statusContainer = document.createElement('div');
+    statusContainer.className = 'status-effects';
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      .status-effects {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .status-effect {
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #8b4513;
+        border-radius: 5px;
+        padding: 0.5rem;
+        color: #ffd700;
+        font-size: 0.8rem;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .status-effect.burning {
+        border-color: #ff4444;
+        background: rgba(255, 68, 68, 0.2);
+      }
+
+      .status-effect.stunned {
+        border-color: #ffeb3b;
+        background: rgba(255, 235, 59, 0.2);
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  createTurnIndicator() {
+    const turnIndicator = document.createElement('div');
+    turnIndicator.className = 'turn-indicator';
+    turnIndicator.innerHTML = `
+      <div class="turn-phase">Phase de Prédiction</div>
+      <div class="turn-timer">30</div>
+    `;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .turn-indicator {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid #8b4513;
+        border-radius: 5px;
+        padding: 1rem;
+        text-align: center;
+        min-width: 200px;
+      }
+
+      .turn-phase {
+        color: #ffd700;
+        font-family: 'Cinzel', serif;
+        margin-bottom: 0.5rem;
+      }
+
+      .turn-timer {
+        font-size: 1.5rem;
+        color: #fff;
+      }
+
+      @keyframes timerWarning {
+        0%, 100% { color: #fff; }
+        50% { color: #ff4444; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  updateSpellList(category) {
+    const spellList = document.querySelector('.spell-list');
+    spellList.innerHTML = '';
+
+    Object.entries(this.duelManager.spellSystem.SPELLS)
+      .filter(([_, spell]) => spell.type === category)
+      .forEach(([id, spell]) => {
+        const spellCard = document.createElement('div');
+        spellCard.className = 'spell-card';
+        spellCard.innerHTML = `
+          <div class="spell-name">${spell.name}</div>
+          <div class="spell-info">
+            <div class="mana-cost">Mana: ${spell.manaCost}</div>
+            ${spell.damage ? `<div>Dégâts: ${spell.damage}</div>` : ''}
+            <div>${spell.description}</div>
+          </div>
+        `;
+        spellCard.addEventListener('click', () => this.selectSpell(id));
+        spellList.appendChild(spellCard);
+      });
+  }
+
+  selectSpell(spellId) {
+    if (this.duelManager.currentPhase !== 'selection') return;
+
+    this.selectedSpell = spellId;
+    document.querySelectorAll('.spell-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    document.querySelector(`[data-spell="${spellId}"]`).classList.add('selected');
+  }
+
+  showPredictionPhase() {
+    const predictionInterface = document.querySelector('.prediction-interface');
+    predictionInterface.style.display = 'block';
+    this.updatePredictionOptions();
+  }
+
+  hidePredictionPhase() {
+    document.querySelector('.prediction-interface').style.display = 'none';
+  }
+
+  updatePredictionOptions() {
+    const optionsContainer = document.querySelector('.prediction-options');
+    optionsContainer.innerHTML = '';
+
+    // Afficher uniquement les sorts offensifs pour la prédiction
+    Object.entries(this.duelManager.spellSystem.SPELLS)
+      .filter(([_, spell]) => spell.type === 'offensive')
+      .forEach(([id, spell]) => {
+        const option = document.createElement('div');
+        option.className = 'prediction-option';
+        option.textContent = spell.name;
+        option.addEventListener('click', () => this.selectPrediction(id));
+        optionsContainer.appendChild(option);
+      });
+  }
+
+  addStatusEffect(type, duration) {
+    const statusEffects = document.querySelector('.status-effects');
+    const effect = document.createElement('div');
+    effect.className = `status-effect ${type}`;
+    effect.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} (${duration}s)`;
+    statusEffects.appendChild(effect);
+
+    const countdown = duration;
+    const interval = setInterval(() => {
+      countdown--;
+      effect.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} (${countdown}s)`;
+      if (countdown <= 0) {
+        effect.remove();
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+
+  updateTurnTimer(time) {
+    const timer = document.querySelector('.turn-timer');
+    timer.textContent = time;
+    if (time <= 5) {
+      timer.style.animation = 'timerWarning 1s infinite';
+    } else {
+      timer.style.animation = 'none';
+    }
+  }
+}
+</script>
